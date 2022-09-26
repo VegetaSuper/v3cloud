@@ -7,7 +7,7 @@ router.post('/register', controller.register)
 router.get('/login', controller.login)
 
 // 查看附件
-// router.get('/file/getFiles', controller.file.getFiles)
+router.get('/file/getFiles', controller.file.getFiles)
 // 上传
 router.post('/file/upload', controller.file.upload)
 

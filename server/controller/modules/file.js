@@ -31,7 +31,6 @@ const upload = async (ctx) => {
     }
 
     const fileList = await mysql('file').where({ name: originalFilename, path }).select()
-
     if (fileList.length > 0) { // 同名替换
       mysql('file').update({
         'modify_time': formatDateTime(lastModifiedDate),
@@ -45,7 +44,6 @@ const upload = async (ctx) => {
         })
 
       }).catch(error => {
-        console.log('error::' + error)
       })
     } else { // 表中插入附件记录
       mysql('file').insert({
@@ -53,14 +51,15 @@ const upload = async (ctx) => {
         'path': path,
         'modify_time': formatDateTime(lastModifiedDate),
         'size': size,
-        'ext': ext
+        'ext': ext,
+        'delete_flag': 0
       }).then(result => {
+        console.log(result)
         // 创建可写流
         const upStream = fs.createWriteStream(path)
         // 可读流通过管道写入可写流
         reader.pipe(upStream)
       }).catch(error => {
-        console.log('error::' + error)
       })
     }
 
@@ -69,8 +68,6 @@ const upload = async (ctx) => {
     }
 
   } catch (error) {
-    console.log('error::' + error)
-
     ctx.status = 500
     ctx.body = {
       msg: '操作失败'
@@ -79,6 +76,24 @@ const upload = async (ctx) => {
 
 }
 
+// 查找文件
+const getFiles = async (ctx) => {
+  const files = await mysql('file').where({ delete_flag: 0 }).select()
+
+  try {
+    ctx.body = {
+      msg: '查询成功',
+      data: files
+    }
+  } catch (error) {
+    ctx.status = 500
+    ctx.body = {
+      msg: '操作失败'
+    }
+  }
+}
+
 module.exports = {
-  upload
+  upload,
+  getFiles
 }
